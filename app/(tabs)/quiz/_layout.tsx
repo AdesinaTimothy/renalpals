@@ -1,11 +1,10 @@
 import { Stack } from "expo-router";
-import "../global.css";
 
-export default function RootLayout() {
+export default function QuizLayout() {
   return (
     <Stack
       screenOptions={{
-        headerBackTitle: "Back",
+        headerShown: false,
         headerStyle: {
           backgroundColor: "#FFFFFF",
         },
@@ -17,21 +16,25 @@ export default function RootLayout() {
       }}
     >
       <Stack.Screen
-        name="(tabs)"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
         name="index"
         options={{
-          headerShown: false,
+          title: "Quiz",
+          headerShown: true,
         }}
       />
       <Stack.Screen
-        name="onboarding"
+        name="[categoryId]"
         options={{
-          headerShown: false,
+          title: "Quiz",
+          headerBackTitle: "Categories",
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="result"
+        options={{
+          headerShown: true,
+          gestureEnabled: false,
         }}
       />
     </Stack>

@@ -1,11 +1,10 @@
 import { Stack } from "expo-router";
-import "../global.css";
 
-export default function RootLayout() {
+export default function MedicationLayout() {
   return (
     <Stack
       screenOptions={{
-        headerBackTitle: "Back",
+        headerShown: false,
         headerStyle: {
           backgroundColor: "#FFFFFF",
         },
@@ -17,21 +16,9 @@ export default function RootLayout() {
       }}
     >
       <Stack.Screen
-        name="(tabs)"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
         name="index"
         options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="onboarding"
-        options={{
-          headerShown: false,
+          title: "Medications",
         }}
       />
     </Stack>

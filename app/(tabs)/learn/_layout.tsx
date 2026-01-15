@@ -1,11 +1,10 @@
 import { Stack } from "expo-router";
-import "../global.css";
 
-export default function RootLayout() {
+export default function LearnLayout() {
   return (
     <Stack
       screenOptions={{
-        headerBackTitle: "Back",
+        headerShown: false,
         headerStyle: {
           backgroundColor: "#FFFFFF",
         },
@@ -17,21 +16,19 @@ export default function RootLayout() {
       }}
     >
       <Stack.Screen
-        name="(tabs)"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
         name="index"
         options={{
-          headerShown: false,
+          title: "Learn",
+          headerShown: true,
         }}
       />
       <Stack.Screen
-        name="onboarding"
+        name="[topicId]"
         options={{
-          headerShown: false,
+          headerShown: true,
+          title: "Topic Details",
+          headerBackTitle: "Learn",
+          presentation: "card",
         }}
       />
     </Stack>
