@@ -94,7 +94,7 @@ const category = () => {
         pathname: "/(tabs)/quiz/result",
         params: {
           score: score.toString(),
-          total: selectedQuizCategory.questions.length.toString(),
+          total: selectedQuizCategory.questions!.length.toString(),
           categoryTitle: selectedQuizCategory.title,
         },
       });

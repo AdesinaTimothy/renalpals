@@ -4,17 +4,17 @@ export type IoniconName = React.ComponentProps<typeof import('@expo/vector-icons
 
 
 export type QuizQuestion = {
-  id: number;
+  id: string;
   question: string;
   options: string[];
-  correctAnswer: string;
+  correctAnswer: number;
   explanation?: string;
-  category_id: number;
+  category_id: string;
   created_at: string;
 };
 
 export type QuizCategory = {
-  id: number;
+  id: string;
   title: string;        // ✅ used in UI
   description?: string;
   icon: IoniconName;
