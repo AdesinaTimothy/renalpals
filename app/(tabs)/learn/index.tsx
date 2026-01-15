@@ -1,13 +1,50 @@
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import "@/global.css";
-import { LinearGradient } from "expo-linear-gradient";
-import { learningTopics } from "@/mocks/learning-topics";
-import { useRouter } from "expo-router";
+import { useArticleStore } from "@/store/articleStore";
 import { shadows } from "@/styles/shadows";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function Quiz() {
   const router = useRouter();
+  const { articles, setArticles } = useArticleStore();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchArticles();
+  }, []);
+
+  const fetchArticles = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_SUPABASE_URL}/rest/v1/articles?select=*`,
+        {
+          headers: {
+            apikey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!,
+            Authorization: `Bearer ${process.env
+              .EXPO_PUBLIC_SUPABASE_ANON_KEY!}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+      setArticles(data);
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-blue-50">
+        <Text>Loading Learning contents...</Text>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-blue-50">
@@ -19,7 +56,7 @@ export default function Quiz() {
           </Text>
 
           <View className=" flex gap-4">
-            {learningTopics.map((topic) => {
+            {articles.map((topic) => {
               return (
                 <TouchableOpacity
                   key={topic.id}

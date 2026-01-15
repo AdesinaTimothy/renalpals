@@ -1,21 +1,65 @@
-import { BookOpen, Heart, Apple, Sun } from "lucide-react-native";
-import { useRouter } from "expo-router";
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Animated,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { quizCategories } from "@/mocks/quiz-data";
+import { useQuizCategoryStore } from "@/store/quizStore";
 import { shadows } from "@/styles/shadows";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function QuizCategoriesScreen() {
   const router = useRouter();
+  const { quizCategories, setQuizCategories } = useQuizCategoryStore();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchQuizCategories();
+  }, []);
+
+  const fetchQuizCategories = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_SUPABASE_URL}/rest/v1/quiz_categories?select=*,quiz_questions(*)`,
+        {
+          headers: {
+            apikey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!,
+            Authorization: `Bearer ${process.env
+              .EXPO_PUBLIC_SUPABASE_ANON_KEY!}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      // Transform the data to match your expected structure
+      const transformedData = data.map((category: any) => ({
+        ...category,
+        questions: (category.quiz_questions || []).map((q: any) => ({
+          id: q.id,
+          question: q.question,
+          options: q.options?.option || [], // Extract the array from the object
+          correctAnswer: q.correct_answer, // Convert snake_case to camelCase
+          explanation: q.explanation,
+          category_id: q.category_id,
+          created_at: q.created_at,
+        })),
+      }));
+
+      setQuizCategories(transformedData);
+      // console.log(quizCategories);
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-blue-50">
+        <Text>Loading Learning contents...</Text>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-blue-50">
@@ -51,7 +95,7 @@ export default function QuizCategoriesScreen() {
                       {quiz.description}
                     </Text>
                     <Text className="text-base text-gray-600 mb-1">
-                      {quiz.questions.length} questions
+                      {quiz.questions?.length ?? 0} questions
                     </Text>
                   </View>
                 </TouchableOpacity>

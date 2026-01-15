@@ -1,23 +1,24 @@
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
-  Animated,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState } from "react";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { quizCategories, QuizQuestion } from "@/mocks/quiz-data";
-import { LinearGradient } from "expo-linear-gradient";
+// import { quizCategories, QuizQuestion } from "@/mocks/quiz-data";
 import { ProgressBar } from "@/components/ProgressBar";
-import * as Haptics from "expo-haptics";
+import { useQuizCategoryStore } from "@/store/quizStore";
+import { QuizQuestion } from "@/types/quiz";
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
 
 const category = () => {
   const router = useRouter();
   const { categoryId } = useLocalSearchParams<{ categoryId: string }>();
-  const selectedQuizCategory = quizCategories.find((t) => t.id == categoryId);
+  const { quizCategories } = useQuizCategoryStore();
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -25,16 +26,42 @@ const category = () => {
   const [score, setScore] = useState(0);
   const [answeredQuestions, setAnsweredQuestions] = useState<boolean[]>([]);
 
+  const selectedQuizCategory = quizCategories.find((t) => t.id == categoryId);
+
   if (!selectedQuizCategory) {
     return (
-      <View>
-        <Text>Category not found</Text>
+      <View className="flex-1 items-center justify-center bg-blue-50">
+        <Text className="text-lg text-gray-600">Category not found</Text>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="mt-4 bg-blue-500 px-6 py-3 rounded-lg"
+        >
+          <Text className="text-white font-semibold">Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (
+    !selectedQuizCategory.questions ||
+    selectedQuizCategory.questions.length === 0
+  ) {
+    return (
+      <View className="flex-1 items-center justify-center bg-blue-50">
+        <Text className="text-lg text-gray-600">No questions available</Text>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="mt-4 bg-blue-500 px-6 py-3 rounded-lg"
+        >
+          <Text className="text-white font-semibold">Go Back</Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
   const currentQuestion: QuizQuestion | undefined =
     selectedQuizCategory?.questions[currentQuestionIndex];
+
   const isLastQuestion =
     currentQuestionIndex === selectedQuizCategory?.questions.length - 1;
 

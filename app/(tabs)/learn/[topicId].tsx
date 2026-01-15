@@ -1,13 +1,14 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import React from "react";
-import { useLocalSearchParams } from "expo-router";
-import { learningTopics } from "@/mocks/learning-topics";
+import { useArticleStore } from "@/store/articleStore";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams } from "expo-router";
+import React from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 const topic = () => {
   const { topicId } = useLocalSearchParams<{ topicId: string }>();
-  const topic = learningTopics.find((t) => t.id === topicId);
+  const { articles } = useArticleStore();
+  const topic = articles.find((t) => t.id === topicId);
 
   if (!topic) {
     return (
