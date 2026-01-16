@@ -1,9 +1,16 @@
 import FeatureCard from "@/components/FeatureCard";
 import { useAuthStore } from "@/store/authStore";
+import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const home = () => {
@@ -23,8 +30,19 @@ const home = () => {
         }}
       >
         <SafeAreaView className="flex-1 p-4">
-          <Text className="text-3xl text-white font-bold">Welcome back</Text>
-          <Text className="text-3xl text-white font-bold">TimoBest!</Text>
+          <View className="flex-row items-center justify-between">
+            <Text className="text-white text-3xl font-bold">Welcome back</Text>
+
+            <TouchableOpacity
+              onPress={() => router.push("/settings")}
+              className="p-2"
+            >
+              <Ionicons name="settings-outline" size={22} color="white" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Username */}
+          <Text className="text-white text-3xl font-bold mt-1">TimoBest!</Text>
         </SafeAreaView>
       </LinearGradient>
       <ScrollView className="flex-1">
