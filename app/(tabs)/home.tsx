@@ -1,12 +1,14 @@
-import { ScrollView, StyleSheet, Text, View, Dimensions } from "react-native";
-import React, { useEffect, useRef } from "react";
 import FeatureCard from "@/components/FeatureCard";
+import { useAuthStore } from "@/store/authStore";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import React from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const home = () => {
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
 
   return (
     <View className="flex-1">
