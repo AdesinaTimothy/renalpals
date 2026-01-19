@@ -1,18 +1,17 @@
-import { shadows } from "@/styles/shadows";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   Modal,
-  SafeAreaView,
   ScrollView,
+  Text,
   TextInput,
   TouchableOpacity,
+  View,
 } from "react-native";
-import { Text, View } from "react-native";
-import { quizCategories } from "@/mocks/quiz-data";
+// import { quizCategories } from "@/mocks/quiz-data";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import * as Haptics from "expo-haptics";
 import { Switch } from "react-native";
 
 interface Medication {
