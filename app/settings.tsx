@@ -1,8 +1,21 @@
 import AccountComp from "@/components/AccountComp";
+import { useAuthStore } from "@/store/authStore";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 
 const settings = () => {
+  const signOut = useAuthStore((state) => state.signOut);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      Alert.alert("Signed out", "You have successfully signed out.");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      Alert.alert("Error", "Something went wrong while signing out.");
+    }
+  };
+
   return (
     <View className="flex-1 p-4 ">
       <View className="flex-row gap-5 items-center">
@@ -124,7 +137,7 @@ const settings = () => {
             rightIcon="chevron-forward"
             rightIconColor="#6B7280"
             href="/meds"
-            onPress={() => console.log("Custom press!")}
+            onPress={handleSignOut}
             disabled={false}
           />
           <AccountComp

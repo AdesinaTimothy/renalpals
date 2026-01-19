@@ -39,6 +39,7 @@ export default function RootLayout() {
         headerStyle: {
           backgroundColor: "#FFFFFF",
         },
+        headerShown: false,
         headerShadowVisible: false,
         headerTintColor: "#1e293b",
         headerTitleStyle: {
@@ -62,6 +63,13 @@ export default function RootLayout() {
         name="onboarding"
         options={{
           headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="settings"
+        options={{
+          headerShown: true,
         }}
       />
     </Stack>
