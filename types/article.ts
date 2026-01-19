@@ -1,3 +1,5 @@
+export type IoniconName = React.ComponentProps<typeof import('@expo/vector-icons').Ionicons>['name'];
+
 
 export interface ArticleSection {
   title: string;
@@ -18,6 +20,8 @@ export type Article = {
   summary?: string;
   topic_id?: number;
   created_at?: string;
+ icon: IoniconName;
+ description: string;
 };
 
 export type ArticleStore = {

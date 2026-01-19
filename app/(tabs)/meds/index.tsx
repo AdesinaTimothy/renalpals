@@ -9,42 +9,17 @@ import {
   View,
 } from "react-native";
 // import { quizCategories } from "@/mocks/quiz-data";
+import { fetchMedications } from "@/api/medication";
+import { Medication } from "@/types/medication";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Switch } from "react-native";
 
-interface Medication {
-  id: string;
-  name: string;
-  dosage: string;
-  frequency: string;
-  time: string;
-  withDialysis: boolean;
-}
+export default function Med() {
+  // const router = useRouter();
 
-export default function Quiz() {
-  const router = useRouter();
-
-  const [medications, setMedications] = useState<Medication[]>([
-    {
-      id: "1",
-      name: "Phosphate Binder",
-      dosage: "800mg",
-      frequency: "With meals",
-      time: "8:00 AM, 1:00 PM, 7:00 PM",
-      withDialysis: false,
-    },
-    {
-      id: "2",
-      name: "Blood Pressure Med",
-      dosage: "10mg",
-      frequency: "Once daily",
-      time: "9:00 AM",
-      withDialysis: false,
-    },
-  ]);
-
+  const [medications, setMedications] = useState<Medication[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newMed, setNewMed] = useState({
     name: "",
@@ -53,6 +28,24 @@ export default function Quiz() {
     time: "",
     withDialysis: false,
   });
+
+  useEffect(() => {
+    const loadMedications = async () => {
+      try {
+        const data = await fetchMedications();
+        console.log("Loaded medications in component:", data);
+        setMedications(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMedications();
+  }, []);
+
+  if (loading) return null;
 
   const handleAddMedication = () => {
     if (!newMed.name.trim()) return;
@@ -107,7 +100,79 @@ export default function Quiz() {
             </TouchableOpacity>
           </View>
 
-          {/* Container to render medication */}
+          {/* Medications List */}
+          <View className="gap-4">
+            {medications.length === 0 ? (
+              <View className="bg-white rounded-2xl p-8 items-center">
+                <Ionicons name="medical-outline" size={48} color="#94a3b8" />
+                <Text className="text-slate-400 text-center mt-4">
+                  No medications added yet.{"\n"}Tap the button above to add
+                  your first medication.
+                </Text>
+              </View>
+            ) : (
+              medications.map((med) => (
+                <View
+                  key={med.id}
+                  className="bg-white rounded-2xl p-4"
+                  style={{
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 8,
+                    elevation: 3,
+                  }}
+                >
+                  <View className="flex-row items-start justify-between mb-2">
+                    <View className="flex-1">
+                      <Text className="text-lg font-bold text-slate-800">
+                        {med.name}
+                      </Text>
+                      {med.dosage && (
+                        <Text className="text-slate-600 mt-1">
+                          {med.dosage}
+                        </Text>
+                      )}
+                    </View>
+                    {med.withDialysis && (
+                      <View className="bg-blue-100 px-3 py-1 rounded-full">
+                        <Text className="text-blue-700 text-xs font-semibold">
+                          With Dialysis
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  <View className="flex-row gap-4 mt-3">
+                    {med.frequency && (
+                      <View className="flex-row items-center gap-1">
+                        <Ionicons
+                          name="repeat-outline"
+                          size={16}
+                          color="#64748b"
+                        />
+                        <Text className="text-slate-600 text-sm">
+                          {med.frequency}
+                        </Text>
+                      </View>
+                    )}
+                    {med.time && (
+                      <View className="flex-row items-center gap-1">
+                        <Ionicons
+                          name="time-outline"
+                          size={16}
+                          color="#64748b"
+                        />
+                        <Text className="text-slate-600 text-sm">
+                          {med.time}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+              ))
+            )}
+          </View>
 
           {/* Container for Modal */}
           <Modal
