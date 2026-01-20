@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import {
+  Alert,
   Modal,
   ScrollView,
   Text,
@@ -9,14 +10,20 @@ import {
   View,
 } from "react-native";
 // import { quizCategories } from "@/mocks/quiz-data";
-import { fetchMedications } from "@/api/medication";
+import {
+  addMedication,
+  deleteMedication,
+  fetchMedications,
+} from "@/api/medication";
+import MedicationCard from "@/components/MedicatonCard";
 import { Medication } from "@/types/medication";
 import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Switch } from "react-native";
 
 export default function Med() {
-  // const router = useRouter();
+  const router = useRouter();
 
   const [medications, setMedications] = useState<Medication[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +36,7 @@ export default function Med() {
     withDialysis: false,
   });
 
+  // This useffect always load the patients medication from the backend as soon the patient enters the screen
   useEffect(() => {
     const loadMedications = async () => {
       try {
@@ -47,29 +55,61 @@ export default function Med() {
 
   if (loading) return null;
 
-  const handleAddMedication = () => {
+  // Add Medication function: This function enable user to ad medication to their delete
+
+  const handleAddMedication = async () => {
     if (!newMed.name.trim()) return;
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-    const medication: Medication = {
-      id: Date.now().toString(),
-      name: newMed.name,
-      dosage: newMed.dosage,
-      frequency: newMed.frequency,
-      time: newMed.time,
-      withDialysis: newMed.withDialysis,
-    };
+    try {
+      const addedMed = await addMedication({
+        name: newMed.name,
+        dosage: newMed.dosage,
+        frequency: newMed.frequency,
+        time: newMed.time,
+        withDialysis: newMed.withDialysis,
+      });
 
-    setMedications([...medications, medication]);
-    setNewMed({
-      name: "",
-      dosage: "",
-      frequency: "",
-      time: "",
-      withDialysis: false,
-    });
-    setShowAddModal(false);
+      // Update local state
+      setMedications((prev) => [...prev, addedMed]);
+
+      setNewMed({
+        name: "",
+        dosage: "",
+        frequency: "",
+        time: "",
+        withDialysis: false,
+      });
+      setShowAddModal(false);
+    } catch (error) {
+      console.error("Failed to add medication:", error);
+    }
+  };
+
+  //Delete Medication function
+  const handleDeleteMedication = async (id: string, name?: string) => {
+    Alert.alert(
+      "Delete Medication",
+      `Are you sure you want to delete ${name || "this medication"}?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteMedication(id);
+
+              // Update local state
+              setMedications((prev) => prev.filter((med) => med.id !== id));
+            } catch (error) {
+              console.error("Failed to delete medication:", error);
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -112,64 +152,13 @@ export default function Med() {
               </View>
             ) : (
               medications.map((med) => (
-                <View
+                <MedicationCard
                   key={med.id}
-                  className="bg-white rounded-2xl p-4"
-                  style={{
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 8,
-                    elevation: 3,
-                  }}
-                >
-                  <View className="flex-row items-start justify-between mb-2">
-                    <View className="flex-1">
-                      <Text className="text-lg font-bold text-slate-800">
-                        {med.name}
-                      </Text>
-                      {med.dosage && (
-                        <Text className="text-slate-600 mt-1">
-                          {med.dosage}
-                        </Text>
-                      )}
-                    </View>
-                    {med.withDialysis && (
-                      <View className="bg-blue-100 px-3 py-1 rounded-full">
-                        <Text className="text-blue-700 text-xs font-semibold">
-                          With Dialysis
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-
-                  <View className="flex-row gap-4 mt-3">
-                    {med.frequency && (
-                      <View className="flex-row items-center gap-1">
-                        <Ionicons
-                          name="repeat-outline"
-                          size={16}
-                          color="#64748b"
-                        />
-                        <Text className="text-slate-600 text-sm">
-                          {med.frequency}
-                        </Text>
-                      </View>
-                    )}
-                    {med.time && (
-                      <View className="flex-row items-center gap-1">
-                        <Ionicons
-                          name="time-outline"
-                          size={16}
-                          color="#64748b"
-                        />
-                        <Text className="text-slate-600 text-sm">
-                          {med.time}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
+                  med={med}
+                  onDelete={() => handleDeleteMedication(med.id, med.name)}
+                  onEdit={(id) => console.log("Trying to edit this medication")}
+                  // onEdit={(id) => router.push(`/medications/edit/${id}`)}
+                />
               ))
             )}
           </View>

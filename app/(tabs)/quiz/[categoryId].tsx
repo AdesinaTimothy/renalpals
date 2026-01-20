@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-// import { quizCategories, QuizQuestion } from "@/mocks/quiz-data";
+
 import { ProgressBar } from "@/components/ProgressBar";
 import { useQuizCategoryStore } from "@/store/quizStore";
 import { QuizQuestion } from "@/types/quiz";
