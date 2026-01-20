@@ -73,13 +73,11 @@ export async function deleteMedication(medId: string) {
 export async function addMedication(medication: Omit<Medication, "id">) {
   const profile = await getUserProfile();
   const { id: profileId } = profile;
- 
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
   if (!session) throw new Error("User not authenticated");
-
   const payload = {
     name: medication.name,
     dosage: medication.dosage,
@@ -107,9 +105,47 @@ export async function addMedication(medication: Omit<Medication, "id">) {
     const error = await response.json();
     throw error; // Throw the actual error object instead of generic message
   }
-
   const newMed = await response.json();
   return newMed[0]; 
 }
 
+export async function editMedication (medicationId: string, medication: Omit<Medication, "id" | "profile_id">){
+    const profile = await getUserProfile();
+    const {id: profileId} = profile;
+    const {data: {session},} = await supabase.auth.getSession();
+
+    if (!session) {
+    throw new Error("User not authenticated");
+  }
+
+  
+  const payload = {
+    ...medication,
+    profile_id: profileId, 
+  };
+
+  const response = await fetch(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/rest/v1/medications?id=eq.${medicationId}`,
+    {
+      method: "PATCH",
+      headers: {
+        apikey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!,
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    console.error("Edit medication error:", error);
+    throw new Error("Failed to edit medication");
+  }
+
+  const data = await response.json();
+  return data[0];
+
+}
 

@@ -13,6 +13,7 @@ import {
 import {
   addMedication,
   deleteMedication,
+  editMedication,
   fetchMedications,
 } from "@/api/medication";
 import MedicationCard from "@/components/MedicatonCard";
@@ -28,6 +29,7 @@ export default function Med() {
   const [medications, setMedications] = useState<Medication[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [newMed, setNewMed] = useState({
     name: "",
     dosage: "",
@@ -35,6 +37,7 @@ export default function Med() {
     time: "",
     withDialysis: false,
   });
+  const [editingMed, setEditingMed] = useState<Medication | null>(null);
 
   // This useffect always load the patients medication from the backend as soon the patient enters the screen
   useEffect(() => {
@@ -84,6 +87,41 @@ export default function Med() {
       setShowAddModal(false);
     } catch (error) {
       console.error("Failed to add medication:", error);
+    }
+  };
+
+  // Function to open the edit modal
+  const handleEditMedication = (medication: Medication) => {
+    setEditingMed(medication);
+    setShowEditModal(true);
+  };
+
+  // Function to save the edited medication
+  const handleSaveEdit = async () => {
+    if (!editingMed || !editingMed.name.trim()) return;
+
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+      const updates = {
+        name: editingMed.name,
+        dosage: editingMed.dosage,
+        frequency: editingMed.frequency,
+        time: editingMed.time,
+        withDialysis: editingMed.withDialysis,
+      };
+
+      const updatedMed = await editMedication(editingMed.id, updates);
+
+      setMedications((prev) =>
+        prev.map((med) => (med.id === editingMed.id ? updatedMed : med))
+      );
+
+      setShowEditModal(false);
+      setEditingMed(null);
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Failed to update medication");
     }
   };
 
@@ -156,8 +194,7 @@ export default function Med() {
                   key={med.id}
                   med={med}
                   onDelete={() => handleDeleteMedication(med.id, med.name)}
-                  onEdit={(id) => console.log("Trying to edit this medication")}
-                  // onEdit={(id) => router.push(`/medications/edit/${id}`)}
+                  onEdit={() => handleEditMedication(med)}
                 />
               ))
             )}
@@ -287,6 +324,145 @@ export default function Med() {
             </View>
           </Modal>
         </View>
+
+        {/* Edit Modal */}
+        <Modal
+          visible={showEditModal}
+          animationType="slide"
+          transparent
+          onRequestClose={() => {
+            setShowEditModal(false);
+            setEditingMed(null);
+          }}
+        >
+          <View className="flex-1 bg-black/50 justify-end">
+            <View className="bg-white rounded-t-3xl px-6 pt-6 pb-8">
+              {/* Header */}
+              <View className="flex-row items-center justify-between mb-6">
+                <Text className="text-xl font-bold text-slate-800">
+                  Edit Medication
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowEditModal(false);
+                    setEditingMed(null);
+                  }}
+                  activeOpacity={0.7}
+                  className="p-2 rounded-full bg-slate-100"
+                >
+                  <Ionicons name="close-outline" size={28} color={"black"} />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {/* Medication Name */}
+                <View className="mb-5">
+                  <Text className="text-sm font-semibold text-slate-600 mb-2">
+                    Medication Name *
+                  </Text>
+                  <TextInput
+                    className="border border-slate-200 rounded-2xl px-4 py-4 text-base text-slate-800"
+                    value={editingMed?.name || ""}
+                    onChangeText={(text) => {
+                      if (editingMed) {
+                        setEditingMed({ ...editingMed, name: text });
+                      }
+                    }}
+                    placeholder="e.g., Phosphate Binder"
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+
+                {/* Dosage */}
+                <View className="mb-5">
+                  <Text className="text-sm font-semibold text-slate-600 mb-2">
+                    Dosage
+                  </Text>
+                  <TextInput
+                    className="border border-slate-200 rounded-2xl px-4 py-4 text-base text-slate-800"
+                    value={editingMed?.dosage || ""}
+                    onChangeText={(text) => {
+                      if (editingMed) {
+                        setEditingMed({ ...editingMed, dosage: text });
+                      }
+                    }}
+                    placeholder="e.g., 800mg"
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+
+                {/* Frequency */}
+                <View className="mb-5">
+                  <Text className="text-sm font-semibold text-slate-600 mb-2">
+                    Frequency
+                  </Text>
+                  <TextInput
+                    className="border border-slate-200 rounded-2xl px-4 py-4 text-base text-slate-800"
+                    value={editingMed?.frequency || ""}
+                    onChangeText={(text) => {
+                      if (editingMed) {
+                        setEditingMed({ ...editingMed, frequency: text });
+                      }
+                    }}
+                    placeholder="e.g., Once daily"
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+
+                {/* Time */}
+                <View className="mb-5">
+                  <Text className="text-sm font-semibold text-slate-600 mb-2">
+                    Time
+                  </Text>
+                  <TextInput
+                    className="border border-slate-200 rounded-2xl px-4 py-4 text-base text-slate-800"
+                    value={editingMed?.time || ""}
+                    onChangeText={(text) => {
+                      if (editingMed) {
+                        setEditingMed({ ...editingMed, time: text });
+                      }
+                    }}
+                    placeholder="e.g., 9:00 AM"
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+
+                {/* Switch */}
+                <View className="flex-row items-center justify-between mb-6">
+                  <Text className="text-sm font-semibold text-slate-600">
+                    Take with dialysis
+                  </Text>
+                  <Switch
+                    value={editingMed?.withDialysis || false}
+                    onValueChange={(value) => {
+                      if (editingMed) {
+                        setEditingMed({ ...editingMed, withDialysis: value });
+                      }
+                    }}
+                    trackColor={{ false: "#e2e8f0", true: "#93c5fd" }}
+                    thumbColor={
+                      editingMed?.withDialysis ? "#3b82f6" : "#f1f5f9"
+                    }
+                  />
+                </View>
+
+                {/* Save Button */}
+                <TouchableOpacity
+                  onPress={handleSaveEdit}
+                  disabled={!editingMed?.name.trim()}
+                  activeOpacity={0.8}
+                  className={`py-4 rounded-2xl items-center ${
+                    editingMed?.name.trim() ? "bg-blue-500" : "bg-blue-300"
+                  }`}
+                >
+                  <Text className="text-[17px] font-bold text-white">
+                    Save Changes
+                  </Text>
+                </TouchableOpacity>
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
     </View>
   );
