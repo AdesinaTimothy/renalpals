@@ -109,20 +109,29 @@ export async function addMedication(medication: Omit<Medication, "id">) {
   return newMed[0]; 
 }
 
-export async function editMedication (medicationId: string, medication: Omit<Medication, "id" | "profile_id">){
-    const profile = await getUserProfile();
-    const {id: profileId} = profile;
-    const {data: {session},} = await supabase.auth.getSession();
+export async function editMedication(
+  medicationId: string,
+  medication: Omit<Medication, "id" | "profile_id">
+) {
+  const profile = await getUserProfile();
+  const { id: profileId } = profile;
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-    if (!session) {
+  if (!session) {
     throw new Error("User not authenticated");
   }
 
-  
   const payload = {
-    ...medication,
-    profile_id: profileId, 
+    name: medication.name,
+    dosage: medication.dosage,
+    frequency: medication.frequency,
+    time: medication.time,
+    with_dialysis: medication.withDialysis, // Convert to snake_case
+    profile_id: profileId,
   };
+
 
   const response = await fetch(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/rest/v1/medications?id=eq.${medicationId}`,
@@ -140,12 +149,9 @@ export async function editMedication (medicationId: string, medication: Omit<Med
 
   if (!response.ok) {
     const error = await response.json();
-    console.error("Edit medication error:", error);
-    throw new Error("Failed to edit medication");
+    throw error; 
   }
 
   const data = await response.json();
   return data[0];
-
 }
-
