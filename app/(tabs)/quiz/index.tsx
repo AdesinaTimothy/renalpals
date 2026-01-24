@@ -36,8 +36,8 @@ export default function QuizCategoriesScreen() {
         questions: (category.quiz_questions || []).map((q: any) => ({
           id: q.id,
           question: q.question,
-          options: q.options?.option || [], // Extract the array from the object
-          correctAnswer: q.correct_answer, // Convert snake_case to camelCase
+          options: q.options || [],
+          correctAnswer: q.correct_answer,
           explanation: q.explanation,
           category_id: q.category_id,
           created_at: q.created_at,
@@ -45,7 +45,6 @@ export default function QuizCategoriesScreen() {
       }));
 
       setQuizCategories(transformedData);
-      // console.log(quizCategories);
     } catch (error) {
       console.error("Error fetching articles:", error);
     } finally {
