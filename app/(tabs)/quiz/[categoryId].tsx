@@ -62,6 +62,7 @@ const category = () => {
     );
   }
 
+  //This helps to get 10 grandom question from the 50 questions under the selectedCategory
   useEffect(() => {
     if (selectedQuizCategory.questions?.length) {
       const shuffled = [...selectedQuizCategory.questions].sort(
@@ -71,9 +72,11 @@ const category = () => {
     }
   }, [selectedQuizCategory]);
 
+  //Function to get current question
   const currentQuestion: QuizQuestion | undefined =
     randomQuizQuestion[currentQuestionIndex];
 
+  //Getting last question
   const isLastQuestion = currentQuestionIndex === randomQuizQuestion.length - 1;
 
   //Function the handle answerSelected
