@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -25,6 +25,9 @@ const category = () => {
   const [showExplanation, setShowExplanation] = useState(false);
   const [score, setScore] = useState(0);
   const [answeredQuestions, setAnsweredQuestions] = useState<boolean[]>([]);
+  const [randomQuizQuestion, setRandomQuizQuestion] = useState<QuizQuestion[]>(
+    []
+  );
 
   const selectedQuizCategory = quizCategories.find((t) => t.id == categoryId);
 
@@ -59,11 +62,19 @@ const category = () => {
     );
   }
 
-  const currentQuestion: QuizQuestion | undefined =
-    selectedQuizCategory?.questions[currentQuestionIndex];
+  useEffect(() => {
+    if (selectedQuizCategory.questions?.length) {
+      const shuffled = [...selectedQuizCategory.questions].sort(
+        () => Math.random() - 0.5
+      );
+      setRandomQuizQuestion(shuffled.slice(0, 10));
+    }
+  }, [selectedQuizCategory]);
 
-  const isLastQuestion =
-    currentQuestionIndex === selectedQuizCategory?.questions.length - 1;
+  const currentQuestion: QuizQuestion | undefined =
+    randomQuizQuestion[currentQuestionIndex];
+
+  const isLastQuestion = currentQuestionIndex === randomQuizQuestion.length - 1;
 
   //Function the handle answerSelected
   const handleAnswerSelect = (index: number) => {
@@ -94,7 +105,7 @@ const category = () => {
         pathname: "/(tabs)/quiz/result",
         params: {
           score: score.toString(),
-          total: selectedQuizCategory.questions!.length.toString(),
+          total: randomQuizQuestion.length.toString(),
           categoryTitle: selectedQuizCategory.title,
         },
       });
@@ -139,8 +150,7 @@ const category = () => {
         {/* Progress Text */}
         <View className="mb-5">
           <Text className="text-sm text-[#64748b] font-semibold mt-2">
-            Question {currentQuestionIndex + 1} of{" "}
-            {selectedQuizCategory?.questions.length}
+            Question {currentQuestionIndex + 1} of {randomQuizQuestion.length}
           </Text>
         </View>
 
