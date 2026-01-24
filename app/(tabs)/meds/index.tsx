@@ -36,7 +36,7 @@ export default function Med() {
     const loadMedications = async () => {
       try {
         const data = await fetchMedications();
-        console.log("Loaded medications in component:", data);
+
         setMedications(data);
       } catch (error) {
         console.error(error);

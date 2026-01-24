@@ -103,7 +103,7 @@ export async function addMedication(medication: Omit<Medication, "id">) {
 
   if (!response.ok) {
     const error = await response.json();
-    throw error; // Throw the actual error object instead of generic message
+    throw error; 
   }
   const newMed = await response.json();
   return newMed[0]; 
@@ -128,7 +128,7 @@ export async function editMedication(
     dosage: medication.dosage,
     frequency: medication.frequency,
     time: medication.time,
-    with_dialysis: medication.withDialysis, // Convert to snake_case
+    with_dialysis: medication.withDialysis, 
     profile_id: profileId,
   };
 

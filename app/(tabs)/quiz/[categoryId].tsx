@@ -98,7 +98,6 @@ const category = () => {
     const newsAnswered = [...answeredQuestions];
     newsAnswered[currentQuestionIndex] = true;
     setAnsweredQuestions(newsAnswered);
-    console.log(index);
   };
 
   //Function to handleNext
@@ -145,7 +144,7 @@ const category = () => {
           {selectedQuizCategory?.questions?.length ? (
             <ProgressBar
               current={currentQuestionIndex + 1}
-              total={selectedQuizCategory.questions.length}
+              total={randomQuizQuestion.length}
             />
           ) : null}
         </View>

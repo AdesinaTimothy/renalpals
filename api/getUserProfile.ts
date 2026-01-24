@@ -30,8 +30,6 @@ export async function getUserProfile() {
 
   if (!session) throw new Error("User not authenticated");
 
-  console.log('Session user ID:', session.user.id);
-
   const response = await fetch(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/rest/v1/profiles?user_id=eq.${session.user.id}&select=*`,
     {

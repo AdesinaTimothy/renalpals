@@ -68,6 +68,17 @@ export default function TabLayout() {
           tabBarBadge: 1,
         }}
       />
+
+      <Tabs.Screen
+        name="fluid"
+        options={{
+          title: "Fluid",
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="water-outline" size={size} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

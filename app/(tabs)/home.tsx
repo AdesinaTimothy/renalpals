@@ -110,7 +110,7 @@ const home = () => {
 
             <View className="flex bg-white gap-4 p-6 mt-3 rounded-3xl border border-gray-200">
               <Text className="text-gray-800 text-2xl font-bold ">
-                Welcome to Your Health Hub
+                Welcome to Renapal Hub
               </Text>
               <Text className="text-gray-500 text-lg">
                 This app is designed to support you throughout your dialysis
