@@ -1,5 +1,7 @@
+import { addFluid } from "@/api/addFluid";
 import FluidModal from "@/components/FluidModal";
-import { ProgressBar } from "@/components/ProgressBar";
+
+import { ProgressBars } from "@/components/ProgressBars";
 import { FluidEntry } from "@/types/fluid";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -26,24 +28,38 @@ const index = () => {
   >();
   const [fluids, setFluids] = useState<FluidEntry[]>([]);
 
-  const add100mil = () => {
-    setFluidTakenToday((fluidTakenToday) => fluidTakenToday + 100);
-  };
-  const add200mil = () => {
-    setFluidTakenToday((fluidTakenToday) => fluidTakenToday + 200);
-  };
-  const add250mil = () => {
-    setFluidTakenToday((fluidTakenToday) => fluidTakenToday + 250);
-  };
-  const add500mil = () => {
-    setFluidTakenToday((fluidTakenToday) => fluidTakenToday + 500);
+  const quickAdd = async (amount: number, type: string = "Water") => {
+    try {
+      const newEntry = await addFluid(amount.toString(), type);
+
+      setFluids((prev) => [newEntry, ...prev]);
+      setFluidTakenToday((prev) => prev + amount);
+    } catch (error: any) {
+      console.error(" Error in quick add:", error);
+      alert(error?.message || "Failed to add fluid");
+    }
   };
 
-  const handleSaveFluid = (fluid: Partial<FluidEntry>) => {
-    if (fluid.amount == null) return;
-    const amountAsNumber = parseFloat(fluid.amount);
-    setFluidTakenToday((prev) => prev + amountAsNumber);
-    setShowFluidModal(false);
+  const add100mil = () => quickAdd(100, "Water");
+  const add200mil = () => quickAdd(200, "Water");
+  const add250mil = () => quickAdd(250, "Water");
+  const add500mil = () => quickAdd(500, "Water");
+
+  const handleSaveFluid = async (fluid: Partial<FluidEntry>) => {
+    try {
+      if (fluid.amount == null) return;
+      const amountAsNumber = parseFloat(fluid.amount);
+
+      const fluidType = fluid.type || "Water";
+      const newEntry = await addFluid(fluid.amount, fluidType);
+
+      setFluids((prev) => [newEntry, ...prev]);
+      setFluidTakenToday((prev) => prev + amountAsNumber);
+      setShowFluidModal(false);
+    } catch (error: any) {
+      console.error("Error adding fluid", error);
+      alert(error?.message || "Failed to add fluid");
+    }
   };
 
   return (
@@ -91,7 +107,7 @@ const index = () => {
               </View>
               <View className="flex-row items-center gap-12 justify-between">
                 <View className="flex-1">
-                  <ProgressBar current={fluidTakenToday} total={fluidLimit} />
+                  <ProgressBars current={fluidTakenToday} total={fluidLimit} />
                 </View>
 
                 <Text className="text-white font-bold">

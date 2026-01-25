@@ -9,7 +9,7 @@ interface ProgressBarProps {
   total: number;
 }
 
-export function ProgressBar({ current, total }: ProgressBarProps) {
+export function ProgressBars({ current, total }: ProgressBarProps) {
   const progress = Math.min(current / total, 1) * 100;
 
   const animatedStyle = useAnimatedStyle(
@@ -20,9 +20,9 @@ export function ProgressBar({ current, total }: ProgressBarProps) {
   );
 
   return (
-    <View className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+    <View className="w-full h-2 bg-white rounded-full overflow-hidden">
       <Animated.View
-        className="h-full bg-green-600 rounded-full"
+        className="h-full bg-green-500 rounded-full"
         style={animatedStyle}
       />
     </View>
