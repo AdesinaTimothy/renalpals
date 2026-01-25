@@ -10,4 +10,6 @@ export async function fetchFluidLimit () {
       } = await supabase.auth.getSession();
     
       if (!session) throw new Error("User not authenticated");
+
+      
 }

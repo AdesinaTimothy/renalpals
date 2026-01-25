@@ -1,4 +1,6 @@
+import FluidModal from "@/components/FluidModal";
 import { ProgressBar } from "@/components/ProgressBar";
+import { FluidEntry } from "@/types/fluid";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -17,13 +19,12 @@ const index = () => {
 
   const [fluidLimit, setFluidLimit] = useState<number>(1500);
   const [fluidTakenToday, setFluidTakenToday] = useState<number>(0);
-
-  //   useEffect(() => {
-  //    const loadLimit = async () => {
-  //     const limit = await fetchFluidlimit()
-  //     setFluidLimit(limit);
-  //    }
-  //   },[])
+  const [showFluidModal, setShowFluidModal] = useState<boolean>(false);
+  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
+  const [selectedFluid, setSelectedFluid] = useState<
+    Partial<FluidEntry> | undefined
+  >();
+  const [fluids, setFluids] = useState<FluidEntry[]>([]);
 
   const add100mil = () => {
     setFluidTakenToday((fluidTakenToday) => fluidTakenToday + 100);
@@ -36,6 +37,13 @@ const index = () => {
   };
   const add500mil = () => {
     setFluidTakenToday((fluidTakenToday) => fluidTakenToday + 500);
+  };
+
+  const handleSaveFluid = (fluid: Partial<FluidEntry>) => {
+    if (fluid.amount == null) return;
+    const amountAsNumber = parseFloat(fluid.amount);
+    setFluidTakenToday((prev) => prev + amountAsNumber);
+    setShowFluidModal(false);
   };
 
   return (
@@ -136,12 +144,28 @@ const index = () => {
           </View>
 
           {/* custome Amount Button */}
-          <TouchableOpacity className="flex-row items-center justify-center gap-4 rounded-2xl border border-dashed mt-3 p-4 border-[#06b6d4]">
+          <TouchableOpacity
+            onPress={() => {
+              setModalMode("add");
+              setSelectedFluid(undefined);
+              setShowFluidModal(true);
+            }}
+            className="flex-row items-center justify-center gap-4 rounded-2xl border border-dashed mt-3 p-4 border-[#06b6d4]"
+          >
             <Ionicons name="add-circle-outline" size={26} color={"#06b6d4"} />
             <Text className="text-[16px] font-bold text-[#06b6d4]">
               Custom Amount
             </Text>
           </TouchableOpacity>
+
+          {/* Add Custom Amount Modal */}
+          <FluidModal
+            visible={showFluidModal}
+            mode={modalMode}
+            fluid={selectedFluid}
+            onClose={() => setShowFluidModal(false)}
+            onSave={handleSaveFluid}
+          />
 
           <View className="flex gap-3 mt-5">
             <Text className="text-gray-800 text-xl font-bold ">
