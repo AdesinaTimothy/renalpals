@@ -16,7 +16,7 @@ export default function FluidLayout() {
       }}
     >
       <Stack.Screen
-        name="Fluid"
+        name="index"
         options={{
           title: "Fluid",
         }}

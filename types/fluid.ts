@@ -1,5 +1,5 @@
 export interface FluidEntry {
-  id?: string;
+  id: string;
   amount: string;
   type: string;
   created_at?: string;

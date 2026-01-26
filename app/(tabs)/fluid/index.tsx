@@ -1,4 +1,4 @@
-import { addFluid } from "@/api/addFluid";
+import { addFluid, deleteFluidEntry, getFluidEntries } from "@/api/addFluid";
 import FluidModal from "@/components/FluidModal";
 
 import { ProgressBars } from "@/components/ProgressBars";
@@ -6,8 +6,9 @@ import { FluidEntry } from "@/types/fluid";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -23,11 +24,40 @@ const index = () => {
   const [fluidTakenToday, setFluidTakenToday] = useState<number>(0);
   const [showFluidModal, setShowFluidModal] = useState<boolean>(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
-  const [selectedFluid, setSelectedFluid] = useState<
-    Partial<FluidEntry> | undefined
-  >();
   const [fluids, setFluids] = useState<FluidEntry[]>([]);
+  const [selectedFluid, setSelectedFluid] = useState<FluidEntry>();
 
+  //UseEffect to log Today's fluid everytime the screen shows
+  useEffect(() => {
+    const allFluidLogs = async () => {
+      try {
+        const allfluids = await getFluidEntries();
+
+        if (Array.isArray(allfluids)) {
+          setFluids(allfluids);
+          const total = allfluids.reduce((sum, f) => sum + f.amount, 0);
+          setFluidTakenToday(total);
+        } else {
+          setFluids([]);
+        }
+      } catch (error: any) {
+        console.error("Error loading fluids:", error);
+        setFluids([]);
+      }
+    };
+
+    allFluidLogs();
+  }, []);
+
+  //Function to format time(created_At) from the fluid
+  const formatTime = (createdAt: string) => {
+    return new Date(createdAt).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  //Function to do quick add
   const quickAdd = async (amount: number, type: string = "Water") => {
     try {
       const newEntry = await addFluid(amount.toString(), type);
@@ -45,6 +75,43 @@ const index = () => {
   const add250mil = () => quickAdd(250, "Water");
   const add500mil = () => quickAdd(500, "Water");
 
+  //Function to delete fluid entry from the logs
+  const handleDeleteFluidEntry = async (id: string) => {
+    Alert.alert(
+      "Delete Fluid Entry",
+      `Are you sure you want to delete this fluid entry?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const fluidToDelete = fluids.find((fluid) => fluid.id === id);
+
+              if (!fluidToDelete) {
+                console.error("Fluid entry not found");
+                alert("Fluid entry not found");
+                return;
+              }
+              await deleteFluidEntry(id);
+
+              setFluids((prev) => prev.filter((fluid) => fluid.id !== id));
+
+              const convertedAmount = Number(fluidToDelete.amount);
+
+              setFluidTakenToday((prev) => prev - convertedAmount);
+            } catch (error: any) {
+              console.error("Error in deleting:", error);
+              alert(error?.message || "Failed to delete fluid");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  //Function to save fluid to the backend
   const handleSaveFluid = async (fluid: Partial<FluidEntry>) => {
     try {
       if (fluid.amount == null) return;
@@ -183,10 +250,66 @@ const index = () => {
             onSave={handleSaveFluid}
           />
 
-          <View className="flex gap-3 mt-5">
+          <View className="flex gap-4 mt-6">
             <Text className="text-gray-800 text-xl font-bold ">
               Today's Log
             </Text>
+
+            <View className="gap-2">
+              {fluids && fluids.length > 0 ? ( // ✅ Add this check
+                fluids.map((fluid) => {
+                  return (
+                    <View
+                      key={fluid.id}
+                      className="flex-row bg-white items-center justify-between p-4 rounded-2xl border border-slate-200 "
+                    >
+                      <View className="flex-row items-center gap-3 flex-1">
+                        <View className="w-10 h-10 rounded-xl bg-sky-100 items-center justify-center">
+                          <Ionicons
+                            name="water-outline"
+                            size={18}
+                            color={"#06b6d4"}
+                          />
+                        </View>
+                        <View>
+                          <Text className="text-[15px] font-semibold text-slate-900 mb-[2px]">
+                            {fluid.type}
+                          </Text>
+                          <Text className="text-[13px] text-slate-500">
+                            {fluid.created_at
+                              ? formatTime(fluid.created_at)
+                              : "Unknown time"}
+                          </Text>
+                        </View>
+                      </View>
+
+                      <View className="flex-row items-center gap-3">
+                        <Text className="text-lg font-bold text-cyan-500">
+                          {fluid.amount}ml
+                        </Text>
+
+                        <TouchableOpacity
+                          onPress={() => handleDeleteFluidEntry(fluid.id)}
+                          className="w-9 h-9 rounded-lg bg-red-100 items-center justify-center"
+                        >
+                          <Ionicons
+                            name="trash-outline"
+                            size={18}
+                            color={"red"}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  );
+                })
+              ) : (
+                <View className="py-8 items-center">
+                  <Text className="text-gray-500 text-center">
+                    No fluids logged yet today
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
         </View>
       </ScrollView>
