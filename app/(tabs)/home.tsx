@@ -30,9 +30,7 @@ const home = () => {
         }}
       >
         <SafeAreaView className="flex-1 p-4">
-          <View className="flex-row items-center justify-between">
-            <Text className="text-white text-3xl font-bold">Welcome back</Text>
-
+          <View className="flex-row items-center justify-end">
             <TouchableOpacity
               onPress={() => router.push("/settings")}
               className="p-2"
@@ -42,7 +40,22 @@ const home = () => {
           </View>
 
           {/* Username */}
-          <Text className="text-white text-3xl font-bold mt-1">TimoBest!</Text>
+          <View className="flex items-center gap-8 mt-10">
+            <View className="flex items-center ">
+              <Text className="text-[32px] font-bold text-white mb-2 tracking-[0.5px]">
+                Dialysis Companion
+              </Text>
+              <Text className="text-[16px] font-medium text-white">
+                Your partner in kidney care
+              </Text>
+            </View>
+            <View className="flex-row w-30 bg-white/15 py-3 px-4 rounded-3xl items-center justify-center gap-6">
+              <Ionicons name="heart-outline" size={24} color={"white"} />
+              <Text className="text-white font-bold text-xl">
+                Track your health
+              </Text>
+            </View>
+          </View>
         </SafeAreaView>
       </LinearGradient>
       <ScrollView className="flex-1">
@@ -106,7 +119,15 @@ const home = () => {
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={{ flex: 1, borderRadius: 24 }}
-            ></LinearGradient>
+            >
+              <FeatureCard
+                title="Fluid Tracker"
+                description="Track and manage your fluid intake with ease"
+                iconName="water-outline"
+                iconBgColor="bg-white/25"
+                onPress={() => router.push("/fluid")}
+              />
+            </LinearGradient>
 
             <View className="flex bg-white gap-4 p-6 mt-3 rounded-3xl border border-gray-200">
               <Text className="text-gray-800 text-2xl font-bold ">

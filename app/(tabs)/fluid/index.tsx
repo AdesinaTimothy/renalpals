@@ -26,6 +26,8 @@ const index = () => {
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [fluids, setFluids] = useState<FluidEntry[]>([]);
   const [selectedFluid, setSelectedFluid] = useState<FluidEntry>();
+  const [hasShownWarning, setHasShownWarning] = useState(false);
+  const fluidOver = fluidTakenToday - fluidLimit;
 
   //UseEffect to log Today's fluid everytime the screen shows
   useEffect(() => {
@@ -48,6 +50,25 @@ const index = () => {
 
     allFluidLogs();
   }, []);
+
+  useEffect(() => {
+    if (fluidTakenToday > fluidLimit && !hasShownWarning) {
+      Alert.alert(
+        "⚠️ Daily Limit Exceeded",
+        `You've consumed ${fluidTakenToday}ml, which is ${
+          fluidTakenToday - fluidLimit
+        }ml over your ${fluidLimit}ml daily limit.`,
+        [
+          {
+            text: "OK",
+            onPress: () => setHasShownWarning(true),
+          },
+        ]
+      );
+    } else if (fluidTakenToday <= fluidLimit) {
+      setHasShownWarning(false);
+    }
+  }, [fluidTakenToday, fluidLimit]);
 
   //Function to format time(created_At) from the fluid
   const formatTime = (createdAt: string) => {
@@ -142,7 +163,7 @@ const index = () => {
         }}
       >
         <SafeAreaView className="flex-1 px-6 ">
-          <View className="flex-1 flex-col gap-6 mt-4 justify-between">
+          <View className="flex-1 flex-col gap-5 mt-4 justify-between">
             <View className="flex-row justify-between items-center">
               <View className="flex-row items-center justify-between gap-4">
                 <Ionicons name="water-outline" size={28} color="white" />
@@ -162,15 +183,24 @@ const index = () => {
             <View className="flex-1 bg-white/15 rounded-[20px] justify-between p-5  border border-white/20">
               <View className="flex-row items-center justify-between mb-4">
                 <Text className="text-white font-bold">Todays's Intake </Text>
-                <Text className="text-white">Limit: {fluidLimit}ml</Text>
+                <Text className="text-white font-bold">
+                  Limit: {fluidLimit}ml
+                </Text>
               </View>
               <View className="flex mb-4">
                 <Text className="text-white text-5xl font-bold  tracking-[-1px] mb-1">
                   {fluidTakenToday}ml
                 </Text>
-                <Text className="text-white">
-                  {fluidLimit - fluidTakenToday}ml left
-                </Text>
+
+                {fluidTakenToday > fluidLimit ? (
+                  <Text className="text-red-900 text-lg font-bold">
+                    {fluidOver}ml over your daily limit
+                  </Text>
+                ) : (
+                  <Text className="text-white font-bold">
+                    {fluidLimit - fluidTakenToday}ml left
+                  </Text>
+                )}
               </View>
               <View className="flex-row items-center gap-12 justify-between">
                 <View className="flex-1">
@@ -256,7 +286,7 @@ const index = () => {
             </Text>
 
             <View className="gap-2">
-              {fluids && fluids.length > 0 ? ( // ✅ Add this check
+              {fluids && fluids.length > 0 ? (
                 fluids.map((fluid) => {
                   return (
                     <View
@@ -303,10 +333,16 @@ const index = () => {
                   );
                 })
               ) : (
-                <View className="py-8 items-center">
-                  <Text className="text-gray-500 text-center">
-                    No fluids logged yet today
-                  </Text>
+                <View className="flex py-12 items-center bg-white border border-slate-200 gap-4 rounded-2xl ">
+                  <Ionicons name="water-outline" size={40} color={"#e2e8f0"} />
+                  <View className="flex items-center gap-2">
+                    <Text className="text-[16px] font-semibold text-slate-500 mt-2">
+                      No entries yet today
+                    </Text>
+                    <Text className="text-[14px] text-slate-400 ">
+                      Start tracking your fluid intake
+                    </Text>
+                  </View>
                 </View>
               )}
             </View>

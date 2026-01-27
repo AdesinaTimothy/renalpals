@@ -1,15 +1,14 @@
-import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 
 export type FeatureCardProps = {
   title: string;
   description: string;
   iconName: keyof typeof Ionicons.glyphMap;
   iconBgColor?: string;
-  //   cardBgColor?: string;
+
   padding?: string;
   onPress?: () => void;
 };
@@ -19,7 +18,6 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   description,
   iconName,
   iconBgColor = "bg-white/25",
-  //   cardBgColor = "bg-blue-700",
   padding = "p-6",
   onPress,
 }) => {
@@ -40,7 +38,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
         </View>
 
         {/* Text content */}
-        <View className="flex gap-3">
+        <View className="flex gap-2">
           <Text className="text-xl font-bold text-white">{title}</Text>
           <Text className="text-md text-white">{description}</Text>
         </View>
