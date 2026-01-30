@@ -5,4 +5,5 @@ export interface Medication {
   frequency: string;
   time: string;
   withDialysis: boolean;
+  notification_id?: string;
 }

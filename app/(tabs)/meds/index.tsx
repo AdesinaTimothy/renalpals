@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Notifications from "expo-notifications";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
-// import { quizCategories } from "@/mocks/quiz-data";
+
 import {
   addMedication,
   deleteMedication,
@@ -10,6 +11,7 @@ import {
 } from "@/api/medication";
 import MedicationModal from "@/components/MedicationModal";
 import MedicationCard from "@/components/MedicatonCard";
+import { convertTo24Hour } from "@/services";
 import { Medication } from "@/types/medication";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
@@ -50,8 +52,47 @@ export default function Med() {
 
   if (loading) return null;
 
-  // Add Medication function: This function enable user to ad medication to their delete
+  //Schedule notifcation for a single medication
+  const scheduleMedicationNotification = async (medication: Medication) => {
+    try {
+      const { hours, minutes } = convertTo24Hour(medication.time);
 
+      if (isNaN(hours) || isNaN(minutes)) {
+        console.error("Invalid time format:", medication.time);
+        return null;
+      }
+      //Schedule Medication reminder
+      const notificationId = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "💊 Medication Reminder",
+          body: `Time to take ${medication.name} - ${medication.dosage}`,
+          sound: true,
+          data: {
+            medicationId: medication.id,
+            medicationName: medication.name,
+          },
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+          hour: hours,
+          minute: minutes,
+          repeats: true,
+        },
+      });
+
+      // Show success message
+      Alert.alert(
+        "Success!",
+        `Reminder set for ${medication.name} at ${medication.time} daily`
+      );
+
+      return notificationId;
+    } catch (error) {
+      console.error("Failed to schedule notification:", error);
+    }
+  };
+
+  // Add Medication function: This function enable user to ad medication to their delete
   const handleAddMedication = async () => {
     if (!newMed.name.trim()) return;
 
@@ -65,6 +106,25 @@ export default function Med() {
         time: newMed.time,
         withDialysis: newMed.withDialysis,
       });
+
+      // Schedule notification
+      if (addedMed.time) {
+        const notificationId = await scheduleMedicationNotification(addedMed);
+
+        if (notificationId) {
+          // Update with ALL fields plus notification_id
+          await editMedication(addedMed.id, {
+            name: addedMed.name,
+            dosage: addedMed.dosage,
+            frequency: addedMed.frequency,
+            time: addedMed.time,
+            withDialysis: addedMed.withDialysis,
+            notification_id: notificationId, // ← Add notification_id
+          });
+
+          addedMed.notification_id = notificationId;
+        }
+      }
 
       // Update local state
       setMedications((prev) => [...prev, addedMed]);
@@ -129,9 +189,16 @@ export default function Med() {
           style: "destructive",
           onPress: async () => {
             try {
+              const medication = medications.find((med) => med.id === id);
+
+              if (medication?.notification_id) {
+                await Notifications.cancelScheduledNotificationAsync(
+                  medication.notification_id
+                );
+              }
+
               await deleteMedication(id);
 
-              // Update local state
               setMedications((prev) => prev.filter((med) => med.id !== id));
             } catch (error) {
               console.error("Failed to delete medication:", error);

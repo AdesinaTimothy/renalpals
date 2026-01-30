@@ -1,4 +1,6 @@
 import { addFluid, deleteFluidEntry, getFluidEntries } from "@/api/addFluid";
+import { AddFluidLimit, fetchFluidLimit } from "@/api/fluidLimit";
+import FluidLimitModal from "@/components/FluidLimitModal";
 import FluidModal from "@/components/FluidModal";
 
 import { ProgressBars } from "@/components/ProgressBars";
@@ -23,6 +25,8 @@ const index = () => {
   const [fluidLimit, setFluidLimit] = useState<number>(1500);
   const [fluidTakenToday, setFluidTakenToday] = useState<number>(0);
   const [showFluidModal, setShowFluidModal] = useState<boolean>(false);
+  const [showFluidLimitModal, setShowFluidLimitModal] =
+    useState<boolean>(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [fluids, setFluids] = useState<FluidEntry[]>([]);
   const [selectedFluid, setSelectedFluid] = useState<FluidEntry>();
@@ -49,6 +53,20 @@ const index = () => {
     };
 
     allFluidLogs();
+  }, []);
+
+  //Useffect to always fetch patient's fluid limit
+  useEffect(() => {
+    const fluidLimit = async () => {
+      try {
+        const limit = await fetchFluidLimit();
+        setFluidLimit(limit);
+      } catch (error: any) {
+        console.error("Error loading fluids:", error);
+      }
+    };
+
+    fluidLimit();
   }, []);
 
   useEffect(() => {
@@ -132,6 +150,22 @@ const index = () => {
     );
   };
 
+  //Function to Edit Fluid Limit
+  const handleAddFluidLimit = async (limitAmount: number) => {
+    try {
+      if (!limitAmount) {
+        return;
+      }
+
+      await AddFluidLimit(limitAmount);
+      setFluidLimit(limitAmount);
+      setShowFluidLimitModal(false);
+    } catch (error) {
+      console.error("Error adding fluid limit", error);
+      alert(error || "Failed to add fluid");
+    }
+  };
+
   //Function to save fluid to the backend
   const handleSaveFluid = async (fluid: Partial<FluidEntry>) => {
     try {
@@ -173,8 +207,8 @@ const index = () => {
               </View>
 
               <TouchableOpacity
-                onPress={() => router.push("/settings")}
-                className="p-2"
+                onPress={() => setShowFluidLimitModal(true)}
+                className="p-2 bg-white/15 rounded-full "
               >
                 <Ionicons name="settings-outline" size={22} color="white" />
               </TouchableOpacity>
@@ -278,6 +312,14 @@ const index = () => {
             fluid={selectedFluid}
             onClose={() => setShowFluidModal(false)}
             onSave={handleSaveFluid}
+          />
+
+          {/* Edit fluid limit */}
+          <FluidLimitModal
+            visible={showFluidLimitModal}
+            fluid={selectedFluid}
+            onClose={() => setShowFluidLimitModal(false)}
+            onSave={handleAddFluidLimit} // ← Direct reference
           />
 
           <View className="flex gap-4 mt-6">

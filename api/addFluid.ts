@@ -65,7 +65,6 @@ export async function getFluidEntries () {
     }
 
     const data = await response.json();
-
     return data;
 }
 
