@@ -1,9 +1,12 @@
 import FeatureCard from "@/components/FeatureCard";
+import { getNextMedication } from "@/services/medication.service";
+
 import { useAuthStore } from "@/store/authStore";
+import { Medication } from "@/types/medication";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -16,6 +19,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const home = () => {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
+  const [nextMedication, setNextMedication] = useState<Medication | null>(null);
+
+  useEffect(() => {
+    const loadNextMed = async () => {
+      const med = await getNextMedication();
+      setNextMedication(med);
+    };
+
+    loadNextMed();
+  }, [nextMedication]);
 
   return (
     <View className="flex-1">
@@ -60,77 +73,86 @@ const home = () => {
       </LinearGradient>
       <ScrollView className="flex-1">
         <View className="flex-1 p-6">
-          <View className="flex gap-3 mb-6">
-            <Text className="text-gray-800 text-2xl font-bold ">
-              Explore Features
+          {/* Next Medication Section */}
+          <View className="flex gap-2 mb-4">
+            <Text className="text-gray-700 text-xl font-bold ">
+              Next Medication
             </Text>
-            <Text className="text-gray-500 text-lg">
-              Everything you need to manage your dialysis journey
+
+            <View>
+              {nextMedication && (
+                <View className=" bg-white rounded-2xl py-4 px-4 flex-row items-center justify-between border border-violet-100 shadow-sm shadow-violet-400/20">
+                  {/* Left side */}
+                  <View className="flex-row items-center gap-[14px] flex-1">
+                    <View className="w-[46px] h-[46px] rounded-[14px] bg-violet-100 items-center justify-center">
+                      <Ionicons
+                        name="medkit-outline"
+                        size={20}
+                        color="#8b5cf6"
+                      />
+                    </View>
+
+                    <View>
+                      <Text className="text-[15px] font-semibold text-slate-800">
+                        {nextMedication.name}
+                      </Text>
+                      <Text className="text-[12px] text-slate-400 mt-[2px]">
+                        {nextMedication.dosage}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Right side */}
+                  <View className="flex-row items-center gap-[5px] bg-violet-100 px-[10px] py-[6px] rounded-full">
+                    <Ionicons name="time-outline" size={14} color="#8b5cf6" />
+                    <Text className="text-[13px] font-semibold text-violet-500">
+                      {nextMedication.time}
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </View>
+          </View>
+
+          <View className="flex gap-3 mb-3 mt-5">
+            <Text className="text-gray-700 text-xl font-bold ">
+              Quick Actions
             </Text>
           </View>
           <View className="flex-1 gap-4">
-            <LinearGradient
-              colors={["#3b82f6", "#1d4ed8"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={{ flex: 1, borderRadius: 24 }}
-            >
+            <View className="flex-row gap-2">
+              <FeatureCard
+                title="Add Fluid"
+                iconName="water-outline"
+                iconColor="#38bdf8"
+                iconBgColor="#38bdf815"
+                onPress={() => router.push("/(tabs)/fluid")}
+              />
+              <FeatureCard
+                title="Medications"
+                iconName="bandage-outline"
+                iconColor="#a78bfa"
+                iconBgColor="#a78bfa15"
+                onPress={() => router.push("/(tabs)/meds")}
+              />
               <FeatureCard
                 title="Learn"
-                description="Explore extensive dialysis topics and resources"
                 iconName="book-outline"
-                iconBgColor="bg-white/25"
+                iconColor="#34d399"
+                iconBgColor="#34d39915"
                 onPress={() => router.push("/learn")}
               />
-            </LinearGradient>
-
-            <LinearGradient
-              colors={["#8b5cf6", "#6d28d9"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={{ flex: 1, borderRadius: 24 }}
-            >
               <FeatureCard
-                title="Practice Quiz"
-                description="Test your knowledge with interactive quizzes"
+                title="Quiz"
                 iconName="school-outline"
-                iconBgColor="bg-white/25"
+                iconColor="#fb923c"
+                iconBgColor="#fb923c15"
                 onPress={() => router.push("/quiz")}
               />
-            </LinearGradient>
-
-            <LinearGradient
-              colors={["#ec4899", "#db2777"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={{ flex: 1, borderRadius: 24 }}
-            >
-              <FeatureCard
-                title="Medication Tracker"
-                description="Manage and track your medications easily"
-                iconName="bandage-outline"
-                iconBgColor="bg-white/25"
-                onPress={() => router.push("/meds")}
-              />
-            </LinearGradient>
-
-            <LinearGradient
-              colors={["#06b6d4", "#0891b2"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={{ flex: 1, borderRadius: 24 }}
-            >
-              <FeatureCard
-                title="Fluid Tracker"
-                description="Track and manage your fluid intake with ease"
-                iconName="water-outline"
-                iconBgColor="bg-white/25"
-                onPress={() => router.push("/fluid")}
-              />
-            </LinearGradient>
+            </View>
 
             <View className="flex bg-white gap-4 p-6 mt-3 rounded-3xl border border-gray-200">
-              <Text className="text-gray-800 text-2xl font-bold ">
+              <Text className="text-gray-800 text-xl font-bold ">
                 Welcome to Renapal Hub
               </Text>
               <Text className="text-gray-500 text-lg">

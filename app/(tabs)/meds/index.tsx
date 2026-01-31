@@ -11,7 +11,8 @@ import {
 } from "@/api/medication";
 import MedicationModal from "@/components/MedicationModal";
 import MedicationCard from "@/components/MedicatonCard";
-import { convertTo24Hour } from "@/services";
+
+import { convertTo24Hour } from "@/services/time";
 import { Medication } from "@/types/medication";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";

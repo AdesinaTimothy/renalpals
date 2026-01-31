@@ -12,12 +12,8 @@ export default function Index() {
         allowBadge: true,
         allowSound: true,
       },
-    }).then((status) => {
-      console.log(`PERM:`, status);
-    });
+    }).then((status) => {});
   });
-
-  const scheduleNotifications = async () => {};
 
   const { user, initialized } = useAuthStore();
 
