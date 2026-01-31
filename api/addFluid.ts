@@ -47,8 +47,16 @@ export async function getFluidEntries () {
   const {data: {session},} = await supabase.auth.getSession();
   if(!session) throw new Error("User not authenticated")
 
+  //Get today's date range
+  const today = new Date();
+  const startOfDay = new Date(today);
+  startOfDay.setHours(0, 0, 0, 0); 
+
+  const endOfDay = new Date(today);
+  endOfDay.setHours(23, 59, 59, 999);
+
     const response = await fetch(
-      `${process.env.EXPO_PUBLIC_SUPABASE_URL}/rest/v1/fluid_entries?profile_id=eq.${profileId}&select=*`,
+      `${process.env.EXPO_PUBLIC_SUPABASE_URL}/rest/v1/fluid_entries?profile_id=eq.${profileId}&created_at=gte.${startOfDay.toISOString()}&created_at=lte.${endOfDay.toISOString()}&select=*`,
       {
         method: "GET",
         headers: {
