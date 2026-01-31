@@ -1,9 +1,11 @@
 import { addFluid, deleteFluidEntry, getFluidEntries } from "@/api/addFluid";
-import { AddFluidLimit, fetchFluidLimit } from "@/api/fluidLimit";
+import { AddFluidLimit } from "@/api/fluidLimit";
 import FluidLimitModal from "@/components/FluidLimitModal";
 import FluidModal from "@/components/FluidModal";
 
 import { ProgressBars } from "@/components/ProgressBars";
+import { formatTime } from "@/services/time";
+import { useFluidLimitStore, useFluidTakenStore } from "@/store/fluidStore";
 import { FluidEntry } from "@/types/fluid";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -22,8 +24,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const index = () => {
   const router = useRouter();
 
-  const [fluidLimit, setFluidLimit] = useState<number>(1500);
-  const [fluidTakenToday, setFluidTakenToday] = useState<number>(0);
+  const { fluidLimit, setFluidLimit } = useFluidLimitStore();
+  //   const [fluidTakenToday, setFluidTakenToday] = useState<number>(0);
+  const { fluidTakenToday, setFluidTakenToday } = useFluidTakenStore();
   const [showFluidModal, setShowFluidModal] = useState<boolean>(false);
   const [showFluidLimitModal, setShowFluidLimitModal] =
     useState<boolean>(false);
@@ -55,20 +58,6 @@ const index = () => {
     allFluidLogs();
   }, []);
 
-  //Useffect to always fetch patient's fluid limit
-  useEffect(() => {
-    const fluidLimit = async () => {
-      try {
-        const limit = await fetchFluidLimit();
-        setFluidLimit(limit);
-      } catch (error: any) {
-        console.error("Error loading fluids:", error);
-      }
-    };
-
-    fluidLimit();
-  }, []);
-
   useEffect(() => {
     if (fluidTakenToday > fluidLimit && !hasShownWarning) {
       Alert.alert(
@@ -88,21 +77,13 @@ const index = () => {
     }
   }, [fluidTakenToday, fluidLimit]);
 
-  //Function to format time(created_At) from the fluid
-  const formatTime = (createdAt: string) => {
-    return new Date(createdAt).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   //Function to do quick add
   const quickAdd = async (amount: number, type: string = "Water") => {
     try {
       const newEntry = await addFluid(amount.toString(), type);
 
       setFluids((prev) => [newEntry, ...prev]);
-      setFluidTakenToday((prev) => prev + amount);
+      setFluidTakenToday(fluidTakenToday + amount);
     } catch (error: any) {
       console.error(" Error in quick add:", error);
       alert(error?.message || "Failed to add fluid");
@@ -139,7 +120,7 @@ const index = () => {
 
               const convertedAmount = Number(fluidToDelete.amount);
 
-              setFluidTakenToday((prev) => prev - convertedAmount);
+              setFluidTakenToday(fluidTakenToday - convertedAmount);
             } catch (error: any) {
               console.error("Error in deleting:", error);
               alert(error?.message || "Failed to delete fluid");
@@ -176,7 +157,7 @@ const index = () => {
       const newEntry = await addFluid(fluid.amount, fluidType);
 
       setFluids((prev) => [newEntry, ...prev]);
-      setFluidTakenToday((prev) => prev + amountAsNumber);
+      setFluidTakenToday(fluidTakenToday + amountAsNumber);
       setShowFluidModal(false);
     } catch (error: any) {
       console.error("Error adding fluid", error);

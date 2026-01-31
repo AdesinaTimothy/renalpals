@@ -45,3 +45,11 @@ export const convertTo12Hour = (hours: number, minutes: number): string => {
   
   return `${displayHours}:${displayMinutes} ${modifier}`;
 };
+
+ //Function to format time(created_At) from the fluid
+  export const formatTime = (createdAt: string) => {
+    return new Date(createdAt).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };

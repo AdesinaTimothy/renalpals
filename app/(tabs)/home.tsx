@@ -1,12 +1,16 @@
+import { getFluidEntries } from "@/api/addFluid";
+import { DecorativeCircles } from "@/components/Decorative";
 import FeatureCard from "@/components/FeatureCard";
 import { getNextMedication } from "@/services/medication.service";
 
 import { useAuthStore } from "@/store/authStore";
+import { useFluidLimitStore, useFluidTakenStore } from "@/store/fluidStore";
+import { FluidEntry } from "@/types/fluid";
 import { Medication } from "@/types/medication";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -20,15 +24,43 @@ const home = () => {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const [nextMedication, setNextMedication] = useState<Medication | null>(null);
+  const { fluidLimit, setFluidLimit } = useFluidLimitStore();
+  const { fluidTakenToday, setFluidTakenToday } = useFluidTakenStore();
 
+  const [fluids, setFluids] = useState<FluidEntry[]>([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadNextMed = async () => {
+        const med = await getNextMedication();
+        setNextMedication(med);
+      };
+
+      loadNextMed();
+    }, [])
+  );
+
+  //UseEffect to log Today's fluid everytime the screen shows
   useEffect(() => {
-    const loadNextMed = async () => {
-      const med = await getNextMedication();
-      setNextMedication(med);
+    const allFluidLogs = async () => {
+      try {
+        const allfluids = await getFluidEntries();
+
+        if (Array.isArray(allfluids)) {
+          setFluids(allfluids);
+          const total = allfluids.reduce((sum, f) => sum + f.amount, 0);
+          setFluidTakenToday(total);
+        } else {
+          setFluids([]);
+        }
+      } catch (error: any) {
+        console.error("Error loading fluids:", error);
+        setFluids([]);
+      }
     };
 
-    loadNextMed();
-  }, [nextMedication]);
+    allFluidLogs();
+  }, []);
 
   return (
     <View className="flex-1">
@@ -42,6 +74,7 @@ const home = () => {
           borderBottomRightRadius: 30,
         }}
       >
+        <DecorativeCircles />
         <SafeAreaView className="flex-1 p-4">
           <View className="flex-row items-center justify-end">
             <TouchableOpacity
@@ -52,8 +85,7 @@ const home = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Username */}
-          <View className="flex items-center gap-8 mt-10">
+          <View className="flex items-center gap-8 mt-6">
             <View className="flex items-center ">
               <Text className="text-[32px] font-bold text-white mb-2 tracking-[0.5px]">
                 Dialysis Companion
@@ -62,27 +94,50 @@ const home = () => {
                 Your partner in kidney care
               </Text>
             </View>
-            <View className="flex-row w-30 bg-white/15 py-3 px-4 rounded-3xl items-center justify-center gap-6">
-              <Ionicons name="heart-outline" size={24} color={"white"} />
-              <Text className="text-white font-bold text-xl">
-                Track your health
+          </View>
+
+          <View className="flex-row gap-3 mt-5 w-full px-4">
+            {/* Fluid Card */}
+            <View className="flex-1 bg-white/15 py-3 px-4 rounded-2xl border border-white/10">
+              <View className="flex-row items-center gap-2 mb-1">
+                <Ionicons name="water-outline" size={16} color="white" />
+                <Text className="text-white/70 text-[11px] font-semibold uppercase tracking-wide">
+                  Fluid
+                </Text>
+              </View>
+              <Text className="text-white font-bold text-[20px]">
+                {fluidTakenToday}ml
               </Text>
+              <Text className="text-white/60 text-[11px]">
+                of {fluidLimit}ml limit
+              </Text>
+            </View>
+
+            {/* Meds Card */}
+            <View className="flex-1 bg-white/15 py-3 px-4 rounded-2xl border border-white/10">
+              <View className="flex-row items-center gap-2 mb-1">
+                <Ionicons name="medical-outline" size={16} color="white" />
+                <Text className="text-white/70 text-[11px] font-semibold uppercase tracking-wide">
+                  Meds
+                </Text>
+              </View>
+              <Text className="text-white font-bold text-[20px]">1/3</Text>
+              <Text className="text-white/60 text-[11px]">taken today</Text>
             </View>
           </View>
         </SafeAreaView>
       </LinearGradient>
       <ScrollView className="flex-1">
         <View className="flex-1 p-6">
-          {/* Next Medication Section */}
-          <View className="flex gap-2 mb-4">
-            <Text className="text-gray-700 text-xl font-bold ">
-              Next Medication
-            </Text>
-
-            <View>
-              {nextMedication && (
+          <View>
+            {nextMedication && (
+              <View className="flex gap-2 mb-4">
+                <Text className="text-gray-700 text-xl font-bold ">
+                  Next Medication
+                </Text>
                 <View className=" bg-white rounded-2xl py-4 px-4 flex-row items-center justify-between border border-violet-100 shadow-sm shadow-violet-400/20">
                   {/* Left side */}
+
                   <View className="flex-row items-center gap-[14px] flex-1">
                     <View className="w-[46px] h-[46px] rounded-[14px] bg-violet-100 items-center justify-center">
                       <Ionicons
@@ -110,8 +165,8 @@ const home = () => {
                     </Text>
                   </View>
                 </View>
-              )}
-            </View>
+              </View>
+            )}
           </View>
 
           <View className="flex gap-3 mb-3 mt-5">
@@ -151,14 +206,14 @@ const home = () => {
               />
             </View>
 
-            <View className="flex bg-white gap-4 p-6 mt-3 rounded-3xl border border-gray-200">
+            <View className="flex bg-white gap-3 p-6 mt-3 rounded-3xl border border-gray-200">
               <Text className="text-gray-800 text-xl font-bold ">
                 Welcome to Renapal Hub
               </Text>
-              <Text className="text-gray-500 text-lg">
+              <Text className="text-gray-500 text-md leading-6">
                 This app is designed to support you throughout your dialysis
-                journey. Learn about treatments, tract medications, test your
-                knowledge, and get instant A1-powered answers to your questions.
+                journey. Track your daily fluid intake, manage medications,
+                monitor your health, and stay on top of your treatment schedule.
               </Text>
             </View>
 
