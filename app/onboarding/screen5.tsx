@@ -6,21 +6,17 @@ import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function OnboardingScreen2() {
+export default function OnboardingScreen5() {
   const router = useRouter();
 
-  const handleNext = () => {
-    router.push("/onboarding/screen3");
-  };
-
-  const handleSkip = () => {
+  const handleGetStarted = () => {
     router.replace("/(auth)/sign-in");
   };
 
   return (
     <View className="flex-1 bg-white">
       <LinearGradient
-        colors={["#0ea5e9", "#0284c7"]}
+        colors={["#f97316", "#ea580c"]}
         className="flex-1 overflow-hidden"
         style={{
           flex: 1,
@@ -33,7 +29,7 @@ export default function OnboardingScreen2() {
           <View className="flex-1 items-center justify-center">
             <View className="w-[180px] h-[180px] rounded-full items-center justify-center bg-white/15">
               <View className="w-[140px] h-[140px] rounded-full items-center justify-center bg-white/20">
-                <Ionicons name="water-outline" size={64} color="#fff" />
+                <Ionicons name="school-outline" size={64} color="#fff" />
               </View>
             </View>
           </View>
@@ -41,11 +37,11 @@ export default function OnboardingScreen2() {
           {/* Text content */}
           <View className="flex-1 justify-center items-center pb-10">
             <Text className="text-[36px] font-extrabold text-white text-center mb-4 tracking-tight leading-[42px]">
-              Track Your{"\n"}Fluid Intake
+              Test Your{"\n"}Knowledge
             </Text>
             <Text className="text-[16px] text-white/85 text-center leading-6 px-3 font-medium">
-              Easily monitor your daily fluid consumption and stay within your
-              personalized limits.
+              Take interactive quizzes to reinforce what you've learned about
+              kidney care.
             </Text>
           </View>
         </SafeAreaView>
@@ -66,40 +62,30 @@ export default function OnboardingScreen2() {
           {/* Pagination dots */}
           <View className="flex-row justify-center items-center gap-2 mb-7">
             <View className="h-2 w-2 rounded-full bg-slate-300" />
-            <View className="h-2 w-6 rounded-full bg-cyan-500" />
             <View className="h-2 w-2 rounded-full bg-slate-300" />
             <View className="h-2 w-2 rounded-full bg-slate-300" />
             <View className="h-2 w-2 rounded-full bg-slate-300" />
+            <View className="h-2 w-6 rounded-full bg-orange-500" />
           </View>
 
-          {/* Buttons */}
-          <View className="flex-row justify-between items-center mb-3">
-            <TouchableOpacity
-              onPress={handleSkip}
-              className="py-4 px-7"
-              activeOpacity={0.7}
-            >
-              <Text className="text-[16px] text-slate-600 font-semibold">
-                Skip
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleNext}
-              className="flex-row items-center gap-2 bg-cyan-500 py-4 px-8 rounded-2xl"
-              activeOpacity={0.8}
-              style={{
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.2,
-                shadowRadius: 8,
-                elevation: 4,
-              }}
-            >
-              <Text className="text-[16px] text-white font-bold">Next</Text>
-              <Ionicons name="arrow-forward-outline" size={18} color="#fff" />
-            </TouchableOpacity>
-          </View>
+          {/* Get Started Button */}
+          <TouchableOpacity
+            onPress={handleGetStarted}
+            className="flex-row items-center justify-center gap-3 bg-orange-500 py-5 rounded-2xl mb-3"
+            activeOpacity={0.8}
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.2,
+              shadowRadius: 8,
+              elevation: 4,
+            }}
+          >
+            <Text className="text-[18px] text-white font-bold">
+              Get Started
+            </Text>
+            <Ionicons name="checkmark-circle" size={22} color="#fff" />
+          </TouchableOpacity>
         </SafeAreaView>
       </View>
     </View>

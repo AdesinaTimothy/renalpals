@@ -1,5 +1,5 @@
-import React from "react";
 import { Stack } from "expo-router";
+import React from "react";
 
 const OnboardingLayout = () => {
   return (
@@ -21,6 +21,7 @@ const OnboardingLayout = () => {
       <Stack.Screen name="screen2" />
       <Stack.Screen name="screen3" />
       <Stack.Screen name="screen4" />
+      <Stack.Screen name="screen5" />
     </Stack>
   );
 };

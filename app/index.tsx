@@ -31,7 +31,8 @@ export default function Index() {
 
   // If authenticated, go to tabs
   if (user) {
-    return <Redirect href="/(tabs)/home" />;
+    // return <Redirect href="/(tabs)/home" />;
+    return <Redirect href="/onboarding/screen1" />;
   }
 
   return <Redirect href="/(auth)/sign-in" />;
